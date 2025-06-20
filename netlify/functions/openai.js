@@ -14,12 +14,21 @@ exports.handler = async function (event) {
     };
   }
 
-  const { question } = JSON.parse(event.body || '{}');
-
-  if (!question) {
+  let question;
+  try {
+    const body = JSON.parse(event.body || '{}');
+    question = body.question;
+  } catch (err) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Question is required' }),
+      body: JSON.stringify({ error: 'Invalid JSON in request body' }),
+    };
+  }
+
+  if (!question || typeof question !== 'string') {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Question is required and must be a string' }),
     };
   }
 
@@ -29,14 +38,14 @@ exports.handler = async function (event) {
       messages: [{ role: 'user', content: question }],
     });
 
-    const answer = chatResponse.choices[0].message.content;
+    const answer = chatResponse.choices[0]?.message?.content || 'No answer received.';
 
     return {
       statusCode: 200,
       body: JSON.stringify({ answer }),
     };
   } catch (error) {
-    console.error('OpenAI error:', error.message);
+    console.error('OpenAI error:', error.message || error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Failed to fetch response from OpenAI' }),
