@@ -1,11 +1,11 @@
 // netlify/functions/openai.js
-const { OpenAI } = require('openai');
+import { OpenAI } from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-exports.handler = async function (event) {
+export async function handler (event) {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -41,4 +41,4 @@ exports.handler = async function (event) {
       body: JSON.stringify({ error: 'OpenAI request failed' }),
     };
   }
-};
+}
