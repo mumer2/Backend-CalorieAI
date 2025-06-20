@@ -13,7 +13,17 @@ exports.handler = async function (event) {
     };
   }
 
-  const { question } = JSON.parse(event.body || '{}');
+  let body;
+  try {
+    body = JSON.parse(event.body);
+  } catch {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid JSON' }),
+    };
+  }
+
+  const { question } = body;
 
   if (!question) {
     return {
@@ -28,14 +38,14 @@ exports.handler = async function (event) {
       messages: [{ role: 'user', content: question }],
     });
 
+    const answer = chatResponse.choices[0].message.content;
+
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        answer: chatResponse.choices[0].message.content,
-      }),
+      body: JSON.stringify({ answer }),
     };
   } catch (error) {
-    console.error('OpenAI error:', error.message);
+    console.error('❌ OpenAI error:', error.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'OpenAI request failed' }),
