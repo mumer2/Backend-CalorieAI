@@ -1,5 +1,4 @@
 // netlify/functions/openai.js
-
 const { OpenAI } = require('openai');
 
 const openai = new OpenAI({
@@ -14,21 +13,12 @@ exports.handler = async function (event) {
     };
   }
 
-  let question;
-  try {
-    const body = JSON.parse(event.body || '{}');
-    question = body.question;
-  } catch (err) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Invalid JSON in request body' }),
-    };
-  }
+  const { question } = JSON.parse(event.body || '{}');
 
-  if (!question || typeof question !== 'string') {
+  if (!question) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Question is required and must be a string' }),
+      body: JSON.stringify({ error: 'Question is required' }),
     };
   }
 
@@ -38,17 +28,17 @@ exports.handler = async function (event) {
       messages: [{ role: 'user', content: question }],
     });
 
-    const answer = chatResponse.choices[0]?.message?.content || 'No answer received.';
-
     return {
       statusCode: 200,
-      body: JSON.stringify({ answer }),
+      body: JSON.stringify({
+        answer: chatResponse.choices[0].message.content,
+      }),
     };
   } catch (error) {
-    console.error('OpenAI error:', error.message || error);
+    console.error('OpenAI error:', error.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to fetch response from OpenAI' }),
+      body: JSON.stringify({ error: 'OpenAI request failed' }),
     };
   }
 };
