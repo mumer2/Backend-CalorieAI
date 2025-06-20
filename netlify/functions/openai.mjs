@@ -1,11 +1,11 @@
-// netlify/functions/openai.js
+// netlify/functions/openai.mjs
 import { OpenAI } from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function handler (event) {
+export async function handler(event) {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
