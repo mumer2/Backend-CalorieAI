@@ -1,0 +1,6 @@
+[build]
+  functions = "netlify/functions"
+  command = "npm run dev"
+
+[dev]
+  functions = "netlify/functions"
