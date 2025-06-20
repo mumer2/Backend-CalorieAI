@@ -1,7 +1,7 @@
 {
   "name": "backend-calorieai",
   "version": "1.0.0",
-  "type": "commonjs", 
+  "type": "commonjs",
   "scripts": {
     "build": "echo 'No build step needed for functions-only backend'"
   },
