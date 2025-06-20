@@ -1,10 +1,9 @@
 {
-  "name": "backend",
+  "name": "backend-calorieai",
   "version": "1.0.0",
-  "main": "server.js",
+ "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+  "build": "echo 'No build step needed for functions-only backend'"
   },
   "dependencies": {
     "axios": "^1.10.0",
@@ -12,6 +11,7 @@
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "livekit-server-sdk": "^2.13.0",
+    "openai": "^5.5.1",
     "stripe": "^12.18.0",
     "uuid": "^11.1.0"
   },
