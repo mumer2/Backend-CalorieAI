@@ -10,24 +10,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
-    "livekit-server-sdk": "^2.13.0",
     "openai": "^5.5.1",
     "stripe": "^12.18.0",
     "uuid": "^11.1.0"
-  },
-  "devDependencies": {
-    "expo-module-scripts": "^4.1.7",
-    "nodemon": "^3.1.10"
-  },
-  "description": "��#\u0000 \u0000C\u0000a\u0000l\u0000o\u0000r\u0000i\u0000e\u0000A\u0000I\u0000-\u0000B\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mumer2/CalorieAI-Backend.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/mumer2/CalorieAI-Backend/issues"
-  },
-  "homepage": "https://github.com/mumer2/CalorieAI-Backend#readme"
+  }
 }
