@@ -1,9 +1,6 @@
-// netlify/functions/openai.js
-const { OpenAI } = require("openai");
+const axios = require('axios');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
@@ -16,10 +13,10 @@ exports.handler = async function (event) {
   let body;
   try {
     body = JSON.parse(event.body);
-  } catch (e) {
+  } catch {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Invalid JSON body' }),
+      body: JSON.stringify({ error: 'Invalid JSON' }),
     };
   }
 
@@ -33,25 +30,30 @@ exports.handler = async function (event) {
   }
 
   try {
-    const chatResponse = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: question }],
-    });
+    const response = await axios.post(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        model: 'mixtral-8x7b-32768', // you can also use 'llama3-70b-8192' or 'gpt-3.5-turbo'
+        messages: [{ role: 'user', content: question }],
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-    const answer = chatResponse.choices[0].message.content;
-
+    const answer = response.data.choices[0].message.content;
     return {
       statusCode: 200,
       body: JSON.stringify({ answer }),
     };
   } catch (error) {
-    console.error("❌ OpenAI Error:", error);
+    console.error('❌ Groq API error:', error.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: 'OpenAI request failed',
-        details: error.message || 'Unknown error',
-      }),
+      body: JSON.stringify({ error: 'Groq request failed' }),
     };
   }
 };
