@@ -2,5 +2,6 @@
 directory = "netlify/functions"
 
 [build]
-command = "echo 'No frontend build step'"
-
+ command = "echo 'No build step'"
+publish = "netlify/functions"
+node_bundler = "esbuild"
