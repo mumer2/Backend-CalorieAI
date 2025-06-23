@@ -1,5 +1,5 @@
 const { connectToDatabase } = require("./db");
-const Request = require("../../models/Request");
+const Request = require("./models/Request");
 
 exports.handler = async (event) => {
   console.log("⚙️ Function started");
