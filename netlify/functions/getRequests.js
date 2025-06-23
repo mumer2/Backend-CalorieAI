@@ -1,21 +1,22 @@
-// netlify/functions/getRequests.js
-const { connectToDatabase } = require("./db");
-const Request = require('./models/Request'); // ✅ relative to the function file
+const { connectToDatabase } = require('./db');
+const Request = require('./models/Request');
 
 exports.handler = async () => {
   try {
     await connectToDatabase();
-    const requests = await Request.find().sort({ createdAt: -1 });
+
+    // Only fetch requests with "pending" status
+    const requests = await Request.find({ status: 'pending' }).sort({ createdAt: -1 });
 
     return {
       statusCode: 200,
       body: JSON.stringify(requests),
     };
-  } catch (err) {
-    console.error("❌ Get Requests Error:", err.message);
+  } catch (error) {
+    console.error("❌ Get Requests Error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to fetch requests" }),
+      body: JSON.stringify({ error: 'Server error' }),
     };
   }
 };
