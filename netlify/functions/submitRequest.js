@@ -11,7 +11,6 @@ exports.handler = async (event) => {
 
   try {
     await connectToDatabase();
-
     const body = JSON.parse(event.body);
 
     if (!body.userId || !body.content || !body.type) {
@@ -23,18 +22,18 @@ exports.handler = async (event) => {
 
     const request = await Request.create({
       userId: body.userId,
-      content: body.content,
       type: body.type,
+      content: body.content,
       status: 'pending',
       createdAt: new Date(),
     });
 
     return {
       statusCode: 201,
-      body: JSON.stringify({ message: 'Request submitted', request }),
+      body: JSON.stringify({ message: 'Success', request }),
     };
   } catch (err) {
-    console.error('❌ Function Error:', err.message);
+    console.error('❌ Backend Error:', err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message || 'Server Error' }),
