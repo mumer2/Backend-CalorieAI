@@ -1,6 +1,6 @@
 // netlify/functions/getUserRequests.js
-const { connectDB } = require('./db'); // ✅ correct
-const Request = require('./models/Request');
+const { connectDB } = require("./db"); // ✅ correct
+const Request = require("../../models/Request");
 exports.handler = async () => {
   await connectDB();
 
@@ -15,7 +15,7 @@ exports.handler = async () => {
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Server error' }),
+      body: JSON.stringify({ error: "Server error" }),
     };
   }
 };
