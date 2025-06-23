@@ -1,8 +1,7 @@
 // netlify/functions/getUserRequests.js
-const connectDB = require('./db');
+const { connectDB } = require('./db'); // ✅ correct
 const Request = require('./models/Request');
-
-exports.handler = async (event) => {
+exports.handler = async () => {
   await connectDB();
 
   const { userId } = event.queryStringParameters;
