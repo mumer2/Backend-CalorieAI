@@ -1,51 +1,51 @@
-const { connectToDatabase } = require('../../db');
-const Request = require('../../models/Request');
+const { connectToDatabase } = require("./db");
+const Request = require("../../models/Request");
 
 exports.handler = async (event) => {
-  console.log('⚙️ Function started');
+  console.log("⚙️ Function started");
 
-  if (event.httpMethod !== 'POST') {
+  if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
-      body: JSON.stringify({ error: 'Method Not Allowed' }),
+      body: JSON.stringify({ error: "Method Not Allowed" }),
     };
   }
 
   try {
-    console.log('📡 Connecting to DB...');
+    console.log("📡 Connecting to DB...");
     await connectToDatabase();
-    console.log('✅ DB Connected');
+    console.log("✅ DB Connected");
 
     const body = JSON.parse(event.body);
 
     if (!body.userId || !body.content || !body.type) {
-      console.log('❌ Missing fields');
+      console.log("❌ Missing fields");
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Missing required fields' }),
+        body: JSON.stringify({ error: "Missing required fields" }),
       };
     }
 
-    console.log('📦 Creating request document...');
+    console.log("📦 Creating request document...");
     const request = await Request.create({
       userId: body.userId,
       type: body.type,
       content: body.content,
-      status: 'pending',
+      status: "pending",
       createdAt: new Date(),
     });
 
-    console.log('✅ Request saved:', request._id);
+    console.log("✅ Request saved:", request._id);
 
     return {
       statusCode: 201,
-      body: JSON.stringify({ message: 'Success', request }),
+      body: JSON.stringify({ message: "Success", request }),
     };
   } catch (err) {
-    console.error('❌ Caught error:', err.message);
+    console.error("❌ Caught error:", err.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message || 'Server Error' }),
+      body: JSON.stringify({ error: err.message || "Server Error" }),
     };
   }
 };
