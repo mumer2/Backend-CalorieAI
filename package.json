@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "start": "echo 'No build step needed for functions-only backend'"
+    "build": "echo 'No build step needed for functions-only backend'"
   },
   "dependencies": {
     "axios": "^1.10.0",
@@ -15,8 +15,5 @@
     "openai": "^4.26.0",
     "stripe": "^12.18.0",
     "uuid": "^11.1.0"
-  },
-  "engines": {
-    "node": "18"
   }
 }
