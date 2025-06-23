@@ -11,11 +11,22 @@ exports.handler = async (event) => {
 
   try {
     await connectToDatabase();
+
     const { id, status, answer } = JSON.parse(event.body);
+
+    if (!id || !status) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing id or status" }),
+      };
+    }
 
     const updated = await Request.findByIdAndUpdate(
       id,
-      { status, answer },
+      {
+        status,
+        ...(answer && { answer }), // only include answer if provided
+      },
       { new: true }
     );
 
@@ -28,7 +39,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Request updated", updated }),
+      body: JSON.stringify({ message: "Request updated", request: updated }),
     };
   } catch (err) {
     return {

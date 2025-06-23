@@ -9,6 +9,7 @@ const requestSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending',
   },
+   answer: { type: String }, // ✅ make sure this exists
   reviewedBy: String,
   createdAt: {
     type: Date,
