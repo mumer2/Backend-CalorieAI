@@ -1,24 +1,22 @@
+// netlify/functions/db.js
 const mongoose = require('mongoose');
 
-let isConnected = false;
+let isConnected;
 
-const connectToDatabase = async () => {
-  if (isConnected) {
-    console.log('✅ Using existing database connection');
-    return;
-  }
+async function connectToDatabase() {
+  if (isConnected) return;
 
   try {
     await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 3000, // 3 seconds timeout
+      dbName: 'calorieAI', // or change to your db name
     });
 
     isConnected = true;
-    console.log('✅ MongoDB connected');
-  } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
-    throw err;
+    console.log("✅ MongoDB connected");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+    throw error;
   }
-};
+}
 
 module.exports = { connectToDatabase };

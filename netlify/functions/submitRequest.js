@@ -1,3 +1,4 @@
+// netlify/functions/submitRequest.js
 const { connectToDatabase } = require("./db");
 const Request = require("./models/Request");
 
