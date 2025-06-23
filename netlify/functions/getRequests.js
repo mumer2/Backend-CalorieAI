@@ -1,6 +1,6 @@
 // netlify/functions/getRequests.js
 const { connectToDatabase } = require("./db");
-const Request = require("../../models/Request");
+const Request = require('./models/Request'); // ✅ relative to the function file
 
 exports.handler = async () => {
   try {
