@@ -1,14 +1,19 @@
 const mongoose = require('mongoose');
 
-const RequestSchema = new mongoose.Schema({
+const requestSchema = new mongoose.Schema({
   userId: String,
   type: String,
   content: String,
-  status: { type: String, default: 'pending' },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending',
+  },
   reviewedBy: String,
-  reviewComment: String,
-  submittedAt: { type: Date, default: Date.now },
-  reviewedAt: Date,
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.models.Request || mongoose.model('Request', RequestSchema);
+module.exports = mongoose.models.Request || mongoose.model('Request', requestSchema);
