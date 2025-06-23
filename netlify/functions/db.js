@@ -1,7 +1,7 @@
 // netlify/functions/db.js
 const mongoose = require('mongoose');
 
-let isConnected;
+let isConnected = false;
 
 async function connectToDatabase() {
   if (isConnected) {
@@ -9,11 +9,13 @@ async function connectToDatabase() {
   }
 
   const conn = await mongoose.connect(process.env.MONGO_URI, {
-    dbName: 'calorieAI', // replace if needed
+    dbName: 'calorieAI', // or remove dbName if it's included in MONGO_URI
   });
 
   isConnected = conn.connections[0].readyState;
-  console.log('✅ MongoDB connected:', isConnected);
+  console.log('✅ MongoDB connected');
 }
 
-module.exports = { connectToDatabase };
+module.exports = {
+  connectToDatabase,
+};
