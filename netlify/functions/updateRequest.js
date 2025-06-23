@@ -1,22 +1,34 @@
-// netlify/functions/updateRequest.js
-const { connectToDatabase } = require('./db');
-const Request = require('./models/Request');
+const { connectToDatabase } = require("./db");
+const Request = require("./models/Request");
 
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'PATCH') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+  if (event.httpMethod !== "PATCH") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method Not Allowed" }),
+    };
   }
 
   try {
     await connectToDatabase();
+    const { id, status, answer } = JSON.parse(event.body);
 
-    const { id, status } = JSON.parse(event.body);
+    const updated = await Request.findByIdAndUpdate(
+      id,
+      { status, answer },
+      { new: true }
+    );
 
-    const updated = await Request.findByIdAndUpdate(id, { status }, { new: true });
+    if (!updated) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: "Request not found" }),
+      };
+    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Request updated', request: updated }),
+      body: JSON.stringify({ message: "Request updated", updated }),
     };
   } catch (err) {
     return {
