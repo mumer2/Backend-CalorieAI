@@ -23,31 +23,31 @@ exports.handler = async (event) => {
       };
     }
 
-    // ✅ Remove the return_url parameter
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency,
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ['alipay'],
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency,
+            unit_amount: amount,
+            product_data: {
+              name: 'Premium Subscription',
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: 'https://example.com/success', // required, can be dummy
+      cancel_url: 'https://example.com/cancel',
     });
-
-    const nextActionUrl = paymentIntent?.next_action?.redirect_to_url?.url;
-
-    if (!nextActionUrl) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'No redirect URL returned from Stripe' }),
-      };
-    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        clientSecret: paymentIntent.client_secret,
-        nextActionUrl,
-      }),
+      body: JSON.stringify({ nextActionUrl: session.url }),
     };
   } catch (err) {
-    console.error('Stripe error:', err);
+    console.error('Stripe Checkout error:', err);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message }),
