@@ -13,7 +13,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const { amount } = JSON.parse(event.body || '{}');
+  const { amount, currency } = JSON.parse(event.body || '{}');
 
   if (!amount) {
     return {
@@ -25,14 +25,17 @@ exports.handler = async (event) => {
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
-      currency: 'usd',
-      payment_method_types: ['card'],
+      currency,
+      payment_method_types: ['alipay'],
     });
+
+    const paymentUrl = paymentIntent.next_action?.redirect_to_url?.url;
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         clientSecret: paymentIntent.client_secret,
+        nextActionUrl: paymentUrl,
       }),
     };
   } catch (err) {
