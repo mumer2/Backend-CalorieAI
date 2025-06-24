@@ -1,13 +1,11 @@
 const Stripe = require('stripe');
 require('dotenv').config();
 
-// Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2022-11-15',
 });
 
 exports.handler = async (event) => {
-  // Allow only POST requests
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -16,7 +14,6 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Parse body and validate
     const { amount, currency } = JSON.parse(event.body || '{}');
 
     if (!amount || !currency) {
@@ -26,19 +23,13 @@ exports.handler = async (event) => {
       };
     }
 
-    // Create a Stripe PaymentIntent with Alipay
+    // ✅ Remove the return_url parameter
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency,
       payment_method_types: ['alipay'],
-      payment_method_options: {
-        alipay: {
-          return_url: 'https://example.com', // required by Stripe, but unused
-        },
-      },
     });
 
-    // Extract the redirect URL for Alipay
     const nextActionUrl = paymentIntent?.next_action?.redirect_to_url?.url;
 
     if (!nextActionUrl) {
@@ -48,7 +39,6 @@ exports.handler = async (event) => {
       };
     }
 
-    // Respond to the client app
     return {
       statusCode: 200,
       body: JSON.stringify({
