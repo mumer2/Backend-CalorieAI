@@ -11,27 +11,30 @@ exports.handler = async (event) => {
     };
   }
 
+  if (!uri) {
+    console.error("❌ MongoDB URI not set in environment variables.");
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Server configuration error: missing DB URI" }),
+    };
+  }
+
   try {
-    // ✅ Debug log
-    console.log("🔐 Connecting to MongoDB with URI:", uri ? "SET" : "NOT SET");
+    const { name, email, password, role } = JSON.parse(event.body);
 
-    const { email, password, role } = JSON.parse(event.body);
-
-    if (!email || !password || !role) {
+    if (!name || !email || !password || !role) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ message: 'Missing fields' }),
+        body: JSON.stringify({ message: 'All fields (name, email, password, role) are required' }),
       };
     }
 
     const client = new MongoClient(uri);
     await client.connect();
-
-    const db = client.db('sample_mflix'); // Make sure this database exists in your cluster
+    const db = client.db('sample_mflix');
     const users = db.collection('users');
 
     const existingUser = await users.findOne({ email: email.toLowerCase() });
-
     if (existingUser) {
       await client.close();
       return {
@@ -41,7 +44,13 @@ exports.handler = async (event) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    await users.insertOne({ email: email.toLowerCase(), passwordHash, role });
+    await users.insertOne({
+      name: name.trim(),
+      email: email.toLowerCase(),
+      passwordHash,
+      role,
+      createdAt: new Date(),
+    });
 
     await client.close();
 
