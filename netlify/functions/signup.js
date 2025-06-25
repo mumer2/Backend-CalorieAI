@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { MongoClient } = require('mongodb');
 
-const uri = process.env.MONGO_URI;
+const uri = process.env.MONGO_DB_URI;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
