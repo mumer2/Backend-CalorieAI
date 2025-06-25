@@ -5,3 +5,8 @@ directory = "netlify/functions"
  command = "echo 'No build step'"
 publish = "netlify/functions"
 node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
