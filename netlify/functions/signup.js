@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { MongoClient } = require('mongodb');
 
-const uri = process.env.MONGO_DB_URI;
+const uri = process.env.MONGO_URI;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -12,12 +12,13 @@ exports.handler = async (event) => {
     const { email, password, role } = JSON.parse(event.body);
 
     if (!email || !password || !role) {
-      return { statusCode: 400, body: JSON.stringify({ message: 'Missing required fields' }) };
+      return { statusCode: 400, body: JSON.stringify({ message: 'Missing fields' }) };
     }
 
     const client = new MongoClient(uri);
     await client.connect();
-    const db = client.db('sample_mflix');
+
+    const db = client.db('calorieai');
     const users = db.collection('users');
 
     const existingUser = await users.findOne({ email: email.toLowerCase() });
@@ -41,7 +42,7 @@ exports.handler = async (event) => {
     console.error('Signup error:', err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: 'Signup error', error: err.message }),
+      body: JSON.stringify({ message: 'Server error', error: err.message }),
     };
   }
 };
