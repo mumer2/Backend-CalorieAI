@@ -1,73 +1,44 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { MongoClient } = require('mongodb');
 
-// Pre-hashed password for '123456'
-const hashedPassword = '$2a$10$s8.1JWbguJwWZ1vVqCDRAO92lkrS4TW/jk9syLZkOaG0sA7gxsKJm';
-
-// Mock user database (replace with real DB in production)
-const users = [
-  {
-    email: 'member@example.com',
-    passwordHash: hashedPassword,
-    role: 'member',
-  },
-  {
-    email: 'coach@example.com',
-    passwordHash: hashedPassword,
-    role: 'coach',
-  },
-];
+const uri = process.env.MONGO_DB_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ message: 'Method Not Allowed' }),
-    };
+    return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
     const { email, password, role } = JSON.parse(event.body);
 
     if (!email || !password || !role) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'All fields are required' }),
-      };
+      return { statusCode: 400, body: JSON.stringify({ message: 'All fields are required' }) };
     }
 
-    const user = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() && u.role.toLowerCase() === role.toLowerCase()
-    );
+    const client = new MongoClient(uri);
+    await client.connect();
+    const db = client.db('calorieai');
+    const users = db.collection('users');
 
-    if (!user) {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({ message: 'User not found or role mismatch' }),
-      };
+    const user = await users.findOne({ email });
+    if (!user || user.role.toLowerCase() !== role.toLowerCase()) {
+      await client.close();
+      return { statusCode: 401, body: JSON.stringify({ message: 'User not found or role mismatch' }) };
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
-
     if (!isMatch) {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({ message: 'Invalid password' }),
-      };
+      await client.close();
+      return { statusCode: 401, body: JSON.stringify({ message: 'Invalid password' }) };
     }
 
-    const token = jwt.sign({ email: user.email, role: user.role }, 'your_jwt_secret', {
-      expiresIn: '7d',
-    });
+    const token = jwt.sign({ email, role }, JWT_SECRET, { expiresIn: '7d' });
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ token, role: user.role }),
-    };
+    await client.close();
+    return { statusCode: 200, body: JSON.stringify({ token, role }) };
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: 'Server error', error: err.message }),
-    };
+    return { statusCode: 500, body: JSON.stringify({ message: 'Login error', error: err.message }) };
   }
 };
