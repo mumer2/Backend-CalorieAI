@@ -19,7 +19,7 @@ exports.handler = async (event) => {
 
     const client = new MongoClient(uri);
     await client.connect();
-    const db = client.db('sample_mflix');
+    const db = client.db('calorieai');
     const users = db.collection('users');
 
     const user = await users.findOne({ email });
