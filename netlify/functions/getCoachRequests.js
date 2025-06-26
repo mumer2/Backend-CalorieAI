@@ -1,18 +1,23 @@
-// functions/getCoachRequests.js
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient } = require('mongodb');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, body: 'Only GET method allowed' };
+    return {
+      statusCode: 405,
+      body: 'Only GET method allowed',
+    };
   }
 
   const coachId = event.queryStringParameters.coachId;
 
-  // Validate coachId
   if (!coachId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: 'Missing coachId query parameter' }),
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
     };
   }
 
@@ -23,8 +28,9 @@ exports.handler = async (event) => {
     const db = client.db('calorieai');
     const collection = db.collection('coach_requests');
 
-    // Convert coachId to ObjectId if needed (only if you're storing it as ObjectId)
-    const query = { coachId };
+    // If stored as ObjectId, uncomment:
+    // const query = { coachId: new ObjectId(coachId) };
+    const query = { coachId }; // assuming string
 
     const requests = await collection
       .find(query)
@@ -34,12 +40,20 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       body: JSON.stringify(requests),
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
     };
   } catch (err) {
     console.error('Error fetching coach requests:', err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal Server Error' }),
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
     };
   } finally {
     await client.close();
