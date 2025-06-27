@@ -50,12 +50,12 @@ exports.handler = async (event) => {
     // Initial points for new user
     let points = 50;
 
-    // Create new user
+    // Create new user document
     const newUser = {
       name: name.trim(),
       email: email.toLowerCase(),
       passwordHash,
-      role,
+      role: role.toLowerCase(),
       points,
       referredUsers: [],
       createdAt: new Date(),
@@ -64,13 +64,16 @@ exports.handler = async (event) => {
     const result = await users.insertOne(newUser);
     const insertedId = result.insertedId;
 
-    // Generate referral code (last 6 chars of ObjectId)
+    // Generate referral code (e.g., last 6 characters of ObjectId)
     const newReferralCode = insertedId.toHexString().slice(-6);
 
     // Save referral code to user document
-    await users.updateOne({ _id: insertedId }, { $set: { referralCode: newReferralCode } });
+    await users.updateOne(
+      { _id: insertedId },
+      { $set: { referralCode: newReferralCode } }
+    );
 
-    // If referred by someone, reward the referrer
+    // Reward referrer if referralCode was used
     if (referralCode) {
       const referrer = await users.findOne({ referralCode });
 
@@ -92,6 +95,8 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         message: 'User registered and rewarded successfully',
         userId: insertedId.toString(),
+        points: points,
+        referralCode: newReferralCode,
       }),
     };
   } catch (err) {
@@ -105,6 +110,7 @@ exports.handler = async (event) => {
     };
   }
 };
+
 
 
 
