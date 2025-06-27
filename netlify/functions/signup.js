@@ -34,7 +34,7 @@ exports.handler = async (event) => {
     const db = client.db('calorieai');
     const users = db.collection('users');
 
-    // Check for existing user
+    // Check if user already exists
     const existingUser = await users.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       await client.close();
@@ -44,13 +44,13 @@ exports.handler = async (event) => {
       };
     }
 
-    // Hash password
+    // Hash the password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Initial points
+    // Initial points for new user
     let points = 50;
 
-    // Insert new user
+    // Create new user
     const newUser = {
       name: name.trim(),
       email: email.toLowerCase(),
@@ -64,18 +64,17 @@ exports.handler = async (event) => {
     const result = await users.insertOne(newUser);
     const insertedId = result.insertedId;
 
-    // Generate referralCode (e.g. last 6 chars of ObjectId)
+    // Generate referral code (last 6 chars of ObjectId)
     const newReferralCode = insertedId.toHexString().slice(-6);
 
-    // Update referralCode in user doc
+    // Save referral code to user document
     await users.updateOne({ _id: insertedId }, { $set: { referralCode: newReferralCode } });
 
-    // Handle referral logic
+    // If referred by someone, reward the referrer
     if (referralCode) {
       const referrer = await users.findOne({ referralCode });
 
       if (referrer) {
-        // Give referrer 50 bonus points and add to their referredUsers list
         await users.updateOne(
           { _id: referrer._id },
           {
@@ -90,7 +89,10 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 201,
-      body: JSON.stringify({ message: 'User registered and rewarded successfully' }),
+      body: JSON.stringify({
+        message: 'User registered and rewarded successfully',
+        userId: insertedId.toString(),
+      }),
     };
   } catch (err) {
     console.error('❌ Signup error:', err);
@@ -103,6 +105,7 @@ exports.handler = async (event) => {
     };
   }
 };
+
 
 
 // const bcrypt = require('bcryptjs');

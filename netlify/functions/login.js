@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, body: JSON.stringify({ message: 'Method Not Allowed' }) };
   }
 
   try {
@@ -44,7 +44,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // JWT payload includes user ID
+    // Generate JWT
     const token = jwt.sign(
       {
         userId: user._id.toString(),
@@ -79,6 +79,7 @@ exports.handler = async (event) => {
     };
   }
 };
+
 
 
 // const bcrypt = require('bcryptjs');
