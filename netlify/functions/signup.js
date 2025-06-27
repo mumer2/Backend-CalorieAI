@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 const uri = process.env.MONGO_DB_URI;
 
@@ -20,7 +20,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { name, email, password, role } = JSON.parse(event.body);
+    const { name, email, password, role, referralCode } = JSON.parse(event.body);
 
     if (!name || !email || !password || !role) {
       return {
@@ -34,6 +34,7 @@ exports.handler = async (event) => {
     const db = client.db('calorieai');
     const users = db.collection('users');
 
+    // Check for existing user
     const existingUser = await users.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       await client.close();
@@ -43,20 +44,53 @@ exports.handler = async (event) => {
       };
     }
 
+    // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
-    await users.insertOne({
+
+    // Initial points
+    let points = 50;
+
+    // Insert new user
+    const newUser = {
       name: name.trim(),
       email: email.toLowerCase(),
       passwordHash,
       role,
+      points,
+      referredUsers: [],
       createdAt: new Date(),
-    });
+    };
+
+    const result = await users.insertOne(newUser);
+    const insertedId = result.insertedId;
+
+    // Generate referralCode (e.g. last 6 chars of ObjectId)
+    const newReferralCode = insertedId.toHexString().slice(-6);
+
+    // Update referralCode in user doc
+    await users.updateOne({ _id: insertedId }, { $set: { referralCode: newReferralCode } });
+
+    // Handle referral logic
+    if (referralCode) {
+      const referrer = await users.findOne({ referralCode });
+
+      if (referrer) {
+        // Give referrer 50 bonus points and add to their referredUsers list
+        await users.updateOne(
+          { _id: referrer._id },
+          {
+            $inc: { points: 50 },
+            $push: { referredUsers: insertedId.toHexString() },
+          }
+        );
+      }
+    }
 
     await client.close();
 
     return {
       statusCode: 201,
-      body: JSON.stringify({ message: 'User registered successfully' }),
+      body: JSON.stringify({ message: 'User registered and rewarded successfully' }),
     };
   } catch (err) {
     console.error('❌ Signup error:', err);
@@ -69,3 +103,76 @@ exports.handler = async (event) => {
     };
   }
 };
+
+
+// const bcrypt = require('bcryptjs');
+// const { MongoClient } = require('mongodb');
+
+// const uri = process.env.MONGO_DB_URI;
+
+// exports.handler = async (event) => {
+//   if (event.httpMethod !== 'POST') {
+//     return {
+//       statusCode: 405,
+//       body: JSON.stringify({ message: 'Method not allowed' }),
+//     };
+//   }
+
+//   if (!uri) {
+//     console.error("❌ MongoDB URI not set in environment variables.");
+//     return {
+//       statusCode: 500,
+//       body: JSON.stringify({ message: "Server configuration error: missing DB URI" }),
+//     };
+//   }
+
+//   try {
+//     const { name, email, password, role } = JSON.parse(event.body);
+
+//     if (!name || !email || !password || !role) {
+//       return {
+//         statusCode: 400,
+//         body: JSON.stringify({ message: 'All fields (name, email, password, role) are required' }),
+//       };
+//     }
+
+//     const client = new MongoClient(uri);
+//     await client.connect();
+//     const db = client.db('calorieai');
+//     const users = db.collection('users');
+
+//     const existingUser = await users.findOne({ email: email.toLowerCase() });
+//     if (existingUser) {
+//       await client.close();
+//       return {
+//         statusCode: 409,
+//         body: JSON.stringify({ message: 'User already exists' }),
+//       };
+//     }
+
+//     const passwordHash = await bcrypt.hash(password, 10);
+//     await users.insertOne({
+//       name: name.trim(),
+//       email: email.toLowerCase(),
+//       passwordHash,
+//       role,
+//       createdAt: new Date(),
+//     });
+
+//     await client.close();
+
+//     return {
+//       statusCode: 201,
+//       body: JSON.stringify({ message: 'User registered successfully' }),
+//     };
+//   } catch (err) {
+//     console.error('❌ Signup error:', err);
+//     return {
+//       statusCode: 500,
+//       body: JSON.stringify({
+//         message: 'Server error',
+//         error: err.message,
+//       }),
+//     };
+//   }
+// };
