@@ -8,7 +8,7 @@ exports.handler = async (event) => {
   const { total_fee = 1, out_trade_no = Date.now() } = JSON.parse(event.body || '{}');
 
   const appid = 'shamail-hasanain';
-  const mch_id = 'YOUR_MCH_ID';
+  const mch_id = '1498214512';
   const key = 'YOUR_API_KEY'; // API v2 key from WeChat merchant platform
   const notify_url = 'https://backend-calorieai.netlify.app/.netlify/functions/wechat-notify';
   const trade_type = 'MWEB';
