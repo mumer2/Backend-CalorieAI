@@ -7,7 +7,7 @@ const generateNonceStr = () => Math.random().toString(36).substr(2, 15);
 exports.handler = async (event) => {
   const { total_fee = 1, out_trade_no = Date.now() } = JSON.parse(event.body || '{}');
 
-  const appid = 'shamail-hasanain';
+  const appid = 'wxd34d223a7b58e5fd'; // Your WeChat app ID
   const mch_id = '1498214512';
   const key = 'YOUR_API_KEY'; // API v2 key from WeChat merchant platform
   const notify_url = 'https://backend-calorieai.netlify.app/.netlify/functions/wechat-notify';
